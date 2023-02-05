@@ -1,0 +1,8 @@
+<svg id="Component_2_1" data-name="Component 2 – 1" xmlns="http://www.w3.org/2000/svg" width="55" height="89" viewBox="0 0 55 89">
+  <g id="Rectangle_2" data-name="Rectangle 2" fill="#00eb27" stroke="#fff" stroke-width="4">
+    <rect width="55" height="54" rx="8" stroke="none"/>
+    <rect x="2" y="2" width="51" height="50" rx="6" fill="none"/>
+  </g>
+  <rect id="Rectangle_3" data-name="Rectangle 3" width="25" height="24" rx="4" transform="translate(15 15)" fill="#fff"/>
+  <line id="Line_2" data-name="Line 2" y2="35" transform="translate(28 54)" fill="none" stroke="#707070" stroke-width="3"/>
+</svg>
