@@ -1,5 +1,5 @@
-import 'dart:developer';
-import 'dart:math';
+ import 'dart:developer';
+ 
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -29,7 +29,7 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
   List<GeoPoint> geoPoints = [];
   List widgetStack = [StatesUser.stateSelectOrigin];
   String destinationAddress = "آدرس مقصد";
-  double distance =0;
+  String distance ="در حال محاسبه فاصله";
   Widget markerIcon = SvgPicture.asset(
     Assets.icons.origin,
     height: 100,
@@ -39,7 +39,7 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
   MapController mapController = MapController(
     initMapWithUserPosition: false,
     initPosition:
-        GeoPoint(latitude: 34.34526537307401, longitude: 47.09255542367724),
+        GeoPoint(latitude: 34.34482098636728, longitude: 47.09250897709512),
   );
 
   @override
@@ -163,11 +163,14 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
       left: 0,
       right: 0,
       child: Container(
-          decoration: const BoxDecoration(color: Colors.transparent),
+           decoration: const BoxDecoration(color: Colors.transparent),
           child: Padding(
             padding: const EdgeInsets.all(Dimens.large),
             child: Column(
               children: [
+
+
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -217,9 +220,11 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
               width: double.infinity,
               child: ElevatedButton(
                   onPressed: () async {
-                    geoPoints.add(await mapController
-                        .getCurrentPositionAdvancedPositionPicker());
-
+await mapController
+                        .getCurrentPositionAdvancedPositionPicker()
+                        .then((value) {
+                      geoPoints.add(value);
+                    });
                     mapController.cancelAdvancedPositionPicker();
 
                     //mark origin on map
@@ -242,18 +247,33 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
                           ),
                         ));
 
-                    try {
-                      List<Placemark> placemarks =
-                          await placemarkFromCoordinates(
-                              geoPoints[1].latitude, geoPoints[1].longitude);
-                      destinationAddress =
-                          "${placemarks.first.locality},${placemarks.first.thoroughfare},${placemarks[2].name}";
-                    } catch (e) {}
+
+
 
                      setState(()  {
                       widgetStack.add(StatesUser.stateDrivingToTheRigin);
                     });
 
+
+
+                    var d = await distance2point(
+                      geoPoints.first,
+                      geoPoints.last,
+                    );
+
+
+                     setState(() {
+                     if(d<=1000){
+
+                       distance = "فاصله مبدا تا مقصد ${d.toInt()} متر" ;
+                    }else if(d>1000){
+
+                      distance = "فاصله مبدا تا مقصد ${d~/1000} کیلومتر";
+
+                    }
+                    });
+ 
+                    await getAddress();
                   },
                   child: Text('انتخاب مقصد', style: MyTextStyles.button)),
             ),
@@ -263,8 +283,26 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
     );
   }
 
+  getAddress() async {
+    try {
+      await placemarkFromCoordinates(
+              geoPoints.last.latitude, geoPoints.last.longitude,localeIdentifier: "fa")
+          .then((List<Placemark> placemarks) {
+        setState(() {
+          destinationAddress =
+              "${placemarks.first.locality} ${placemarks.first.thoroughfare} ${placemarks[2].name}";
+        });
+      });
+    } catch (e) {
+      destinationAddress = "آدرس یافت نشد";
+      log(e.toString());
+    }
+  }
+
   stateDrivingToTheRigin() {
-    return Positioned(
+    mapController.zoomOut();
+    mapController.centerMap;
+     return Positioned(
       bottom: 0,
       left: 0,
       right: 0,
@@ -279,8 +317,8 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children:   [
-                  Text(" ${distance.toString()} کیلومتر"),
-                  Padding(
+                  Text(distance.toString()),
+                  const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Icon(
                       Icons.route,
@@ -328,14 +366,5 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
     );
   }
  
-
- double calculateDistance(lat1, lon1, lat2, lon2){
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 - c((lat2 - lat1) * p)/2 +
-        c(lat1 * p) * c(lat2 * p) *
-            (1 - c((lon2 - lon1) * p))/2;
-    return 12742 * asin(sqrt(a));
-  }
 
 }
