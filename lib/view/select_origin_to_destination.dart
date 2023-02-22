@@ -39,7 +39,8 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
   MapController mapController = MapController(
     initMapWithUserPosition: false,
     initPosition:
-        GeoPoint(latitude: 34.34482098636728, longitude: 47.09250897709512),
+        GeoPoint(latitude: 35.7367516373
+, longitude:51.2911096718),
   );
 
   @override
@@ -220,11 +221,12 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
               width: double.infinity,
               child: ElevatedButton(
                   onPressed: () async {
-await mapController
+                    await mapController
                         .getCurrentPositionAdvancedPositionPicker()
                         .then((value) {
                       geoPoints.add(value);
                     });
+                    
                     mapController.cancelAdvancedPositionPicker();
 
                     //mark origin on map
@@ -247,32 +249,23 @@ await mapController
                           ),
                         ));
 
-
-
-
-                     setState(()  {
+                    setState(() {
                       widgetStack.add(StatesUser.stateDrivingToTheRigin);
                     });
-
-
 
                     var d = await distance2point(
                       geoPoints.first,
                       geoPoints.last,
                     );
 
-
-                     setState(() {
-                     if(d<=1000){
-
-                       distance = "فاصله مبدا تا مقصد ${d.toInt()} متر" ;
-                    }else if(d>1000){
-
-                      distance = "فاصله مبدا تا مقصد ${d~/1000} کیلومتر";
-
-                    }
+                    setState(() {
+                      if (d <= 1000) {
+                        distance = "فاصله مبدا تا مقصد ${d.toInt()} متر";
+                      } else if (d > 1000) {
+                        distance = "فاصله مبدا تا مقصد ${d ~/ 1000} کیلومتر";
+                      }
                     });
- 
+
                     await getAddress();
                   },
                   child: Text('انتخاب مقصد', style: MyTextStyles.button)),
