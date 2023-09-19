@@ -5,7 +5,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 import '../decorations.dart';
 import '../dimens.dart';
@@ -114,23 +114,31 @@ class _UserSelectOriginState extends State<UserSelectOrigin> {
               child: IconButton(
                 onPressed: () {
                   setState(() {
-                    widgetStack.removeLast();
-                    mapController.removeMarker(geoPoints.last);
-                    if (geoPoints.isEmpty) {
-                      mapController.advancedPositionPicker();
-                    }
+                    widgetStack.last != widgetStack.first
+                    ? widgetStack.removeLast()
+                    : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                          'شما نمی توانید خارج شوید',
+                          style: MyTextStyles.button,
+                        ),
+                        backgroundColor: Color.fromARGB(255, 13, 220, 141),
+                      ));
 
-                    if (geoPoints.isNotEmpty) {
-                      geoPoints.removeLast();
-
-                      markerIcon = SvgPicture.asset(
-                        Assets.icons.origin,
-                        height: 100,
-                        width: 48,
-                      );
-
-                      mapController.init();
-                    }
+                if (geoPoints.isEmpty) {
+                  mapController.advancedPositionPicker();
+                  markerIcon = SvgPicture.asset(Assets.icons.origin,height: 100,width: 48,);
+                }
+                if (geoPoints.isNotEmpty) {
+                  mapController.removeMarker(geoPoints.last);
+                  geoPoints.removeLast();
+                  if (widgetStack.last ==
+                      StatesUser.stateSelectDestination) {
+                    markerIcon = SvgPicture.asset(Assets.icons.destination,height: 100,width: 48,);
+                  } else {
+                    markerIcon = SvgPicture.asset(Assets.icons.origin,height: 100,width: 48, );
+                  }
+                  mapController.init();
+                }
                   });
                 },
                 icon: const Icon(Icons.arrow_back),
